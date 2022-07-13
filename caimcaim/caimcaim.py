@@ -110,7 +110,7 @@ class CAIMD(BaseEstimator, TransformerMixin):
                 k = k + 1
                 while split_points:
                     scheme = mainscheme[:]
-                    sp = split_points.pop()
+                    sp = split_points.pop(0)
                     scheme.append(sp)
                     scheme.sort()
                     c = self.get_caim(scheme, xj, yj)
@@ -157,11 +157,14 @@ class CAIMD(BaseEstimator, TransformerMixin):
             if j in categorical:
                 continue
             sh = scheme[j]
-            sh[-1] = sh[-1] + 1
+            sh[-1] = sh[-1]
             xj = X[:, j]
             # xi = xi[np.invert(np.isnan(xi))]
             for i in range(len(sh) - 1):
-                ind = np.where((xj >= sh[i]) & (xj < sh[i + 1]))[0]
+                if sh[i] == sh[-2]:
+                    ind = np.where((xj >= sh[i]) & (xj <= sh[i + 1]))[0]
+                else:
+                    ind = np.where((xj >= sh[i]) & (xj < sh[i + 1]))[0]
                 X_di[ind, j] = i
         if hasattr(self, 'indx'):
             return pd.DataFrame(X_di, index=self.indx, columns=self.columns)
